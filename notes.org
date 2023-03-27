@@ -1,4 +1,5 @@
 * Inbox
+<<<<<<< HEAD
 ** [2023-03-23 Чт 14:45] How to CI(and build) on gitlab
 
 [[file:~/repo/software-architecture-cpp/Chapter09/gitlab-ci.yml::cache:]]
@@ -65,3 +66,284 @@ history_of_visited_merchants::get_merchant
 [[file:~/repo/software-architecture-cpp/Chapter08/mobile_app/test/merchants/reviewtests_gmock.cpp::constexpr auto new_rating = stars{4};
  static_assert(RATING != new_rating);
  history_.rate(merchant_index_, stars{new_rating});]]
+=======
+** Chapter 05
+*** [2023-03-17 Пт 01:22] c20 modules enabling feature
+
+[[file:~/repo/software-architecture-cpp/Chapter05/CMakeLists.txt::if(ENABLE_MODULES)]]
+** Chapter 11
+*** [2023-03-25 Сб 15:30] The lock between similar coroutines I guess
+#+begin_src cpp
+    auto lock = co_await mutex.scoped_lock_async();  // remember to co_await!
+    ints.emplace_back(i);
+#+end_src
+[[file:~/repo/software-architecture-cpp/Chapter11/coroutines/main_1.cpp::auto lock = co_await mutex.scoped_lock_async(); // remember to co_await!
+ ints.emplace_back(i);]]
+
+*** [2023-03-25 Сб 19:38] Defining a function in CMake
+#+begin_src cmake
+function(add_benchmark NAME SOURCE)
+  add_executable(${NAME} ${SOURCE})
+  target_compile_features(${NAME} PRIVATE cxx_std_20)
+  target_link_libraries(${NAME} PRIVATE benchmark::benchmark pthread)
+endfunction()
+#+end_src
+
+[[file:~/repo/software-architecture-cpp/Chapter11/CMakeLists.txt::function(add_benchmark NAME SOURCE)
+ add_executable(${NAME} ${SOURCE})
+ target_compile_features(${NAME} PRIVATE cxx_std_20)
+ target_link_libraries(${NAME} PRIVATE benchmark::benchmark pthread)
+endfunction()]]
+
+*** [2023-03-25 Сб 19:41] How to add coroutines library from source
+#+begin_src cmake
+include(FetchContent)
+FetchContent_Declare(
+  cppcoro
+  GIT_REPOSITORY https://github.com/andreasbuhr/cppcoro
+  GIT_TAG main
+  GIT_SHALLOW ON)
+FetchContent_MakeAvailable(cppcoro)
+#+end_src
+
+[[file:~/repo/software-architecture-cpp/Chapter11/CMakeLists.txt::include(FetchContent)
+FetchContent_Declare(
+ cppcoro
+ GIT_REPOSITORY https://github.com/andreasbuhr/cppcoro
+ GIT_TAG main
+ GIT_SHALLOW ON)
+FetchContent_MakeAvailable(cppcoro)]]
+
+*** [2023-03-25 Сб 19:45] Don't forget this when using conan
+use this when you do "conan install <source_directory> --output-folder=build --build=missing -s build_type=Release"
+
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
+
+#+begin_src cmake
+# we add our build directory to CMAKE_PREFIX_PATH so that CMake can find the config and/or target files produced by Conan. Next, we just use them to find our dependency.
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}")
+#and after that you can use
+find_package(benchmark REQUIRED)
+#and other conan handled dependecies
+#+end_src
+
+[[file:~/repo/software-architecture-cpp/Chapter11/CMakeLists.txt::list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}")]]
+
+*** [2023-03-25 Сб 21:34] Coroutines main explanation
+This code demonstrates the use of the C++ library for coroutine-based concurrency, cppcoro. The program creates a thread pool with three threads, schedules work on the thread pool, and then waits for the work to complete.
+
+The fill_number function is an asynchronous function that produces a number, waits for some time, and then adds the number to a vector in a thread-safe way using an async_mutex object. The do_routine_work function creates a vector of tasks that call the fill_number function with different values of i. The tasks are scheduled on the thread pool using the schedule_on function from cppcoro. The do_routine_work function waits for all tasks to complete using the when_all_ready function from cppcoro, and then returns the vector of produced numbers.
+
+In main, the program creates a thread pool with three threads and calls the do_routine_work function with the thread pool. The result of do_routine_work is a task that is scheduled on the thread pool, and the program waits for the task to complete using the sync_wait function from cppcoro. Finally, the produced numbers are printed to the console.
+
+Yuri Khramov
+what "auto lock = co_await mutex.scoped_lock_async();" line do ?
+The line auto lock = co_await mutex.scoped_lock_async(); in the fill_number function creates a new lock object that locks the async_mutex mutex and waits asynchronously until the lock can be acquired. This is done using the scoped_lock_async() member function of the cppcoro::async_mutex class, which returns a cppcoro::async_mutex::scoped_lock object.
+
+The scoped_lock object holds the lock on the async_mutex mutex for the duration of its lifetime. When the scoped_lock object is destroyed (e.g., when it goes out of scope), the lock on mutex is released automatically. This ensures that the async_mutex is properly unlocked, even if an exception is thrown during the execution of the fill_number function.
+
+The co_await keyword in the line auto lock = co_await mutex.scoped_lock_async(); suspends the execution of the fill_number coroutine until the scoped_lock_async() operation completes. When the lock is acquired, the execution of the fill_number coroutine continues with the next statement, which adds a new integer to the vector ints.
+
+
+Yuri Khramov
+
+what does keyword "co_await" means ?
+co_await is a keyword in C++20 that is used to suspend the execution of a coroutine until a specific operation completes. When a coroutine encounters a co_await expression, it means that the coroutine is waiting for the completion of an asynchronous operation, and the coroutine's execution is suspended until the operation completes.
+
+The co_await keyword is typically used with coroutines that perform I/O or other long-running operations that would normally block the execution of the program. Instead of blocking the execution, the coroutine can suspend its execution and allow other coroutines or threads to execute while it is waiting for the operation to complete.
+
+When the operation completes, the coroutine is resumed, and its execution continues from the point where it was suspended. The result of the operation, if any, is typically returned from the co_await expression as a future or a task, depending on the asynchronous library being used.
+
+In summary, co_await is a powerful keyword that enables C++ coroutines to perform asynchronous operations without blocking the execution of the program.
+
+
+Yuri Khramov
+What is the difference between "emplace_back" and "push_back" ?
+emplace_back and push_back are two member functions of the std::vector class in C++ that are used to add elements to the end of a vector. However, they differ in the way they add elements and how they use memory.
+
+The push_back function adds a copy of an existing object to the end of the vector. It creates a new copy of the object and then adds the copy to the vector. If the object is large or expensive to copy, this can be inefficient.
+
+On the other hand, the emplace_back function constructs a new object in place at the end of the vector. It creates the new object directly in the vector's memory, without making a copy of an existing object. This can be more efficient than push_back for large or complex objects, because it avoids the overhead of copying or moving the object.
+
+In summary, the main difference between emplace_back and push_back is that emplace_back constructs a new object in place at the end of the vector, while push_back adds a copy of an existing object to the end of the vector. emplace_back can be more efficient for large or complex objects, while push_back is simpler to use for small or simple objects.
+
+
+Yuri Khramov
+what vector::reserve function does ?
+vector::reserve is a member function of the C++ std::vector class that reserves memory space for a specified number of elements in the vector.
+
+When a vector is created, it has a certain capacity, which is the amount of memory allocated for storing its elements. As elements are added to the vector, its capacity is automatically increased as needed to accommodate the new elements. This process of reallocating memory and copying the elements can be inefficient, especially when the vector contains a large number of elements.
+
+The reserve function can be used to avoid this reallocation process and improve the efficiency of adding elements to a vector. It allocates memory for a specified number of elements in the vector, but does not change the size of the vector itself. This means that the vector's capacity is increased, but its size remains unchanged.
+
+By reserving enough memory in advance, you can prevent unnecessary reallocations and reduce the overhead of adding elements to the vector. This can be especially useful in cases where you know the approximate number of elements that the vector will contain, or when you are adding a large number of elements to the vector in a loop.
+
+In summary, the vector::reserve function is used to reserve memory space for a specified number of elements in a vector, in order to improve performance when adding elements to the vector.
+
+
+Yuri Khramov
+what "std::move" in this example do ?
+In this example, std::move is used with tasks as an argument to cppcoro::when_all_ready:
+
+arduino
+Copy code
+co_await cppcoro::when_all_ready(std::move(tasks));
+std::move is a C++ standard library function that performs a move operation on the object passed as its argument. In this case, it is used to move the contents of tasks into the when_all_ready function.
+
+The cppcoro::when_all_ready function takes a list of tasks as its argument and returns a new task that completes when all of the input tasks have completed. When the input tasks are completed, the result of the returned task is a tuple of the results of the input tasks.
+
+By passing std::move(tasks) as an argument, we are effectively transferring ownership of the contents of tasks to when_all_ready. This allows when_all_ready to modify the contents of tasks without making a copy, which can be more efficient.
+
+In summary, std::move is used in this example to move the contents of tasks into the cppcoro::when_all_ready function, allowing it to efficiently process the input tasks and return a new task that completes when all of the input tasks have completed.
+
+
+Yuri Khramov
+why do we need "std::move" ? Why we can't pass to the function just "tasks" ?
+In this example, std::move is used to transfer ownership of the contents of tasks to the cppcoro::when_all_ready function.
+
+Without std::move, if we just pass tasks to the when_all_ready function, a copy of tasks would be made. This could be inefficient, especially if the vector contains a large number of elements or elements that are expensive to copy.
+
+Using std::move, on the other hand, allows us to transfer ownership of the contents of tasks to the when_all_ready function without making a copy. This can be more efficient, especially if the vector contains a large number of elements or elements that are expensive to copy.
+
+In summary, we use std::move in this example to avoid making a copy of tasks when passing it to the cppcoro::when_all_ready function, which can be more efficient.
+
+
+Yuri Khramov
+So "work" variable is std::vector<int> ?
+No, work is not a std::vector<int>.
+
+work is a cppcoro::task<std::vector<int>> object. It is created by calling the do_routine_work function, which returns a task that will eventually produce a vector of integers.
+
+The cppcoro::task type is used in the C++ Coroutines library to represent a potentially asynchronous operation that produces a result. When the task is executed, it may suspend and resume execution at various points to perform I/O, wait for other tasks to complete, or perform other operations. When the task completes, it produces a result of the specified type.
+
+In this case, the do_routine_work task creates several fill_number tasks that add elements to the ints vector, and then uses the cppcoro::when_all_ready function to wait for all of those tasks to complete before returning the ints vector as the result of the do_routine_work task.
+
+When we call cppcoro::sync_wait(work), we are waiting for the work task to complete and produce its result. The sync_wait function is a utility function provided by the C++ Coroutines library that blocks the current thread until the task completes and returns the result of the task. In this case, the result is a std::vector<int>.
+
+
+Yuri Khramov
+So am I right when presume that "do_routine_work" is not blocking function but "cppcoro::sync_wait" is ?
+Yes, you are correct.
+
+The do_routine_work function is not a blocking function. It is a coroutine that uses the C++ Coroutines library to create several tasks and schedule them to run asynchronously on a thread pool. When do_routine_work is called, it returns a cppcoro::task object that represents the ongoing operation to produce a vector of integers.
+
+The cppcoro::sync_wait function, on the other hand, is a blocking function. It blocks the current thread until the specified task completes and returns its result. In this case, cppcoro::sync_wait(work) waits for the do_routine_work task to complete and produce a vector of integers. Once the task is complete and the vector is available, cppcoro::sync_wait returns the vector, allowing the program to continue executing on the current thread.
+
+
+Yuri Khramov
+So I got it right that we provide less threads in thread pool than necessary for parallel execution of our tasks ?
+Yes, that is correct.
+
+In the provided code, cppcoro::static_thread_pool{3} creates a thread pool with three worker threads. However, the do_routine_work function creates five tasks to be executed in parallel. This means that the tasks will be scheduled to run on the available worker threads in the thread pool, with each worker thread potentially handling multiple tasks over time. Since there are only three worker threads, some of the tasks will have to wait until a worker thread becomes available to execute them.
+
+Note that the choice of the number of worker threads in the thread pool is typically based on factors such as the number of available CPU cores, the expected workload, and the trade-off between parallelism and thread overhead.
+
+[[file:~/repo/software-architecture-cpp/Chapter11/coroutines/main_1.cpp]]
+
+*** [2023-03-27 Пн 00:38] benchmarking
+Could you please explain to me what happens in this code ?
+#+begin_src cpp
+#include <benchmark/benchmark.h>
+
+#include <ranges>
+#include <vector>
+
+using namespace std::ranges;
+
+namespace {
+
+template <typename T>
+auto make_sorted_vector(std::size_t size) {
+  auto sorted = std::vector<T>{};
+  sorted.reserve(size);
+
+  auto sorted_view = views::iota(T{0}) | views::take(size);
+  std::ranges::copy(sorted_view, std::back_inserter(sorted));
+  return sorted;
+}
+
+constexpr auto MAX_HAYSTACK_SIZE = std::size_t{10'000'000};
+constexpr auto NEEDLE = 2137;
+
+void binary_search_in_sorted_vector(benchmark::State &state) {
+  auto haystack = make_sorted_vector<int>(MAX_HAYSTACK_SIZE);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(lower_bound(haystack, NEEDLE));
+  }
+}
+
+void linear_search_in_sorted_vector(benchmark::State &state) {
+  auto haystack = make_sorted_vector<int>(MAX_HAYSTACK_SIZE);
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(find(haystack, NEEDLE));
+  }
+}
+
+BENCHMARK(linear_search_in_sorted_vector);
+BENCHMARK(binary_search_in_sorted_vector);
+
+}  // namespace
+
+BENCHMARK_MAIN();
+#+end_src
+This code is benchmarking two search algorithms (linear and binary) applied to a sorted vector of integers.
+
+The code uses the Google Benchmark library to measure the performance of each algorithm by timing how long it takes to execute a given number of iterations of each search function. The goal is to compare the performance of the two search algorithms and determine which one is faster for this particular use case.
+
+The make_sorted_vector function creates a sorted vector of integers with a given size. It uses the views::iota view to generate a range of integers from 0 to size-1 and then uses std::ranges::copy to insert the range into the vector in a sorted order.
+
+The binary_search_in_sorted_vector function performs binary search on the sorted vector. It creates a sorted vector of integers with a maximum size of 10,000,000 using the make_sorted_vector function. It then performs a benchmark loop, which calls lower_bound function to find the lower bound of the NEEDLE value in the vector. The benchmark::DoNotOptimize function is used to prevent the compiler from optimizing away the benchmark loop.
+
+The linear_search_in_sorted_vector function performs linear search on the sorted vector. It also creates a sorted vector of integers with a maximum size of 10,000,000 using the make_sorted_vector function. It then performs a benchmark loop, which calls find function to find the NEEDLE value in the vector. The benchmark::DoNotOptimize function is used to prevent the compiler from optimizing away the benchmark loop.
+
+Finally, the BENCHMARK macro is used to register each benchmark function with the Google Benchmark library. The BENCHMARK_MAIN macro is used to define the main function for the benchmark program. When the program is run, it will execute each registered benchmark function and output the results.
+
+Yuri Khramov
+Please explain me what is happening in this line in details
+ "  auto sorted_view = views::iota(T{0}) | views::take(size); "
+This line of code creates a view of integers that starts from zero and continues up to the given size, and then it creates a sub-view of the first size integers from that view.
+
+Let's break down this line of code into two parts:
+
+views::iota(T{0})
+views::iota is a range view that generates a range of incrementing integers, starting from the given value. In this code, T{0} is used as the starting value, so the iota view will generate an infinite sequence of integers starting from zero.
+
+views::take(size)
+views::take is a range view that takes the first size elements of the range it operates on. In this code, it is used to create a sub-view of the first size integers generated by the iota view.
+
+The | operator is used to chain the two views together into a pipeline, so the resulting view represents a finite sequence of integers starting from zero and ending at size-1.
+
+The resulting view, sorted_view, can be used as an input range for algorithms that work on ranges, such as std::ranges::copy that is used in this code to copy the elements from the view into a vector in a sorted order.
+
+Yuri Khramov
+Can you explain what happens in this function ?
+#+begin_src cpp
+void generate_sizes(benchmark::internal::Benchmark *b) {
+  for (long haystack = MIN_HAYSTACK_SIZE; haystack <= MAX_HAYSTACK_SIZE;
+       haystack *= 100) {
+    for (auto needle :
+         {haystack / 8, haystack / 2, haystack - 1, haystack + 1}) {
+      b->Args({needle, haystack});
+    }
+  }
+}
+#+end_src
+This function generates input sizes for the benchmarks by iterating over a range of haystack sizes and generating several needle values for each haystack size.
+
+Here's a step-by-step explanation of what happens in the function:
+
+=benchmark::internal::Benchmark *b=
+The function takes a pointer to a benchmark object that it will use to register benchmark cases with different input sizes.
+
+~for (long haystack = MIN_HAYSTACK_SIZE; haystack <= MAX_HAYSTACK_SIZE; haystack *= 100)~
+The outer loop iterates over a range of haystack sizes starting from MIN_HAYSTACK_SIZE and ending at MAX_HAYSTACK_SIZE, with each iteration increasing the haystack size by a factor of 100.
+
+=for (auto needle : {haystack / 8, haystack / 2, haystack - 1, haystack + 1})=
+For each haystack size, the inner loop generates four different needle values: haystack / 8, haystack / 2, haystack - 1, and haystack + 1. These values are chosen to cover a range of possible needle values within the haystack size.
+
+=b->Args({needle, haystack})=
+For each combination of haystack and needle values, the function calls b->Args() to register a new benchmark case with the benchmark object. The Args() function takes a vector of input arguments, which in this case are the needle value and the haystack size, and adds the new benchmark case to the benchmark object.
+
+Overall, the generate_sizes function generates a range of input sizes for the benchmark that covers a wide range of haystack sizes and needle values. This helps to ensure that the benchmark results are representative of the performance of the search algorithms across a range of input sizes and needle values.
+[[file:~/repo/software-architecture-cpp/Chapter11/microbenchmarking/main_2.cpp::constexpr auto NEEDLE = 2137;]]
+>>>>>>> 929a5493e6231026188c81508b6028298b4109a8
