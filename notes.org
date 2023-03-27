@@ -1,0 +1,67 @@
+* Inbox
+** [2023-03-23 Чт 14:45] How to CI(and build) on gitlab
+
+[[file:~/repo/software-architecture-cpp/Chapter09/gitlab-ci.yml::cache:]]
+** Look at the definition and the function using
+#+begin_src cpp
+ // defining function. It accepts review class as an input
+  void post_review(review r) final {
+    if (r.customer != customer_id_) {
+      throw std::invalid_argument{
+          "Trying to post a review under a different customer ID"};
+    }
+    reviews_[r.merchant] = std::move(r);
+  }
+
+// And there we call it with 4 separated arguments ???
+    fake_review_store_.post_review(
+        {CUSTOMER_ID, MERCHANT_ID, REVIEW_TEXT, RATING});
+
+
+// Ye...And here are the definition of the structure which post_review() is waiting.
+// Exactly 4 arguments
+struct review {
+  using customer_id_t = std::uint64_t;
+  using merchant_id_t = std::uint64_t;
+
+  customer_id_t customer;
+  merchant_id_t merchant;
+  std::string review;
+  stars rating;
+};
+#+end_src
+
+** [2023-03-22 Ср 14:33] Looks like another real-field class
+#+begin_src cpp
+class CustomerReviewStore
+#+end_src
+[[file:~/repo/software-architecture-cpp/Chapter08/mobile_app/src/merchants/reviews.cpp::class CustomerReviewStore]]
+
+** [2023-03-22 Ср 14:22] Looks like field class(minimally defined)
+#+begin_src cpp
+class visited_merchant
+#+end_src
+[[file:~/repo/software-architecture-cpp/Chapter08/mobile_app/include/merchants/visited_merchant_history.h::class visited_merchant]]
+
+** [2023-03-22 Ср 12:55] I think it checks if it is a top-level project now or not.
+#+begin_src cpp
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+#+end_src
+[[file:~/repo/software-architecture-cpp/Chapter08/mobile_app/CMakeLists.txt::if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)]]
+
+** [2023-03-22 Ср 11:18] Something I can understand
+#+begin_src cpp
+history_of_visited_merchants::add
+history_of_visited_merchants::rate
+history_of_visited_merchants::get_merchant
+#+end_src
+
+** [2023-03-22 Ср 11:16] It is made for static control ?
+#+begin_src cpp
+  constexpr auto new_rating = stars{4};
+  static_assert(RATING != new_rating);
+  history_.rate(merchant_index_, stars{new_rating});
+#+end_src
+[[file:~/repo/software-architecture-cpp/Chapter08/mobile_app/test/merchants/reviewtests_gmock.cpp::constexpr auto new_rating = stars{4};
+ static_assert(RATING != new_rating);
+ history_.rate(merchant_index_, stars{new_rating});]]

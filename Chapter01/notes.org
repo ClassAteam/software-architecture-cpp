@@ -1,11 +1,14 @@
 * Inbox
 ** [2022-04-14 Чт 09:48] To use our new class, we only need to modify the calling code
+#+begin_src cpp
 using MyProject =
     Project<FrontEndDeveloper, MiddlewareDeveloper, BackEndDeveloper>;
-
+#+end_src
 [[file:~/repo/Software-Architecture-with-Cpp/Chapter01/cc/coupling/loose.cpp::using MyProject =
  Project<FrontEndDeveloper, MiddlewareDeveloper, BackEndDeveloper>;]]
-** [2022-04-14 Чт 09:46] When we added this no changes to the Peoject class were required, so now the classes are loosely couled. All we needed to do was to add the MiddlewareDeveloper class.Structuring our code this way allows for smaller rebuilds , faster development, and easier testing, all with less code that's easier to maintain.
+
+** [2022-04-14 Чт 09:46] When we were adding this no changes to the Peoject class were required, so now the classes are loosely coupled. All we have needed to do is to add the MiddlewareDeveloper class.Structuring our code this way allows for smaller rebuilds , faster development, and easier testing, all with less code that's easier to maintain.
+#+begin_src cpp
 class MiddlewareDeveloper {
  public:
   void develop() { developMiddleware(); }
@@ -13,22 +16,22 @@ class MiddlewareDeveloper {
  private:
   void developMiddleware() {}
 };
+#+end_src
 
-[[file:~/repo/Software-Architecture-with-Cpp/Chapter01/cc/coupling/loose.cpp::class MiddlewareDeveloper {
- public:
- void develop() { developMiddleware(); }
-
- private:
- void developMiddleware() {}
-};]]
-** [2022-04-14 Чт 09:42] look very carefully at this template at learn from it against tight.cpp example.
+** [2022-04-14 Чт 09:42] look very carefully at this template and learn from it.
+#+begin_src cpp
 template <typename... Devs>
-
+#+end_src
 [[file:~/repo/Software-Architecture-with-Cpp/Chapter01/cc/coupling/loose.cpp::template <typename... Devs>]]
+
 ** [2022-04-14 Чт 08:55] what does this stroke means ???
+#+begin_src cpp
 template <typename... Devs>
-
+#+end_src
 [[file:~/repo/Software-Architecture-with-Cpp/Chapter01/cc/coupling/loose.cpp::template <typename... Devs>]]
-** [2022-04-13 Ср 15:03] look like the cstring wrapper
+
+** [2022-04-13 Ср 15:03] looks like the c string wrapper
+#+begin_src cpp
 std::string_view str
+#+end_src
 [[file:~/repo/Software-Architecture-with-Cpp/Chapter01/philosophy/algorithms/good_dots.cpp::std::string_view str]]
